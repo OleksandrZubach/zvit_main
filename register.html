@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Реєстрація - САД та ГОРОД</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #d1f3d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-md w-96">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-dark-green">САД та ГОРОД</h1>
+                <p class="text-gray-600 mt-2">Реєстрація нового облікового запису</p>
+            </div>
+            <form id="register-form" class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 mb-2">Ім'я:</label>
+                    <input type="text" id="name" required class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Email:</label>
+                    <input type="email" id="email" required class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Пароль:</label>
+                    <input type="password" id="password" required class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label class="block text-gray-700 mb-2">Підтвердження пароля:</label>
+                    <input type="password" id="confirm-password" required class="w-full p-2 border rounded">
+                </div>
+                <button type="submit" class="w-full bg-dark-green text-white py-2 rounded hover:bg-primary transition-colors">
+                    Зареєструватися
+                </button>
+            </form>
+            <div class="mt-4 text-center">
+                <p class="text-gray-600">Вже маєте обліковий запис? <a href="/login.html" class="text-dark-green hover:text-primary">Увійти</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            
+            // Перевіряємо чи паролі співпадають
+            if (password !== confirmPassword) {
+                alert('Паролі не співпадають');
+                return;
+            }
+            
+            // Отримуємо користувачів з localStorage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            // Перевіряємо чи email вже зареєстрований
+            if (users.some(user => user.email === email)) {
+                alert('Цей email вже зареєстрований');
+                return;
+            }
+            
+            // Створюємо нового користувача
+            const newUser = {
+                id: Date.now(),
+                name,
+                email,
+                password
+            };
+            
+            // Додаємо користувача до списку
+            users.push(newUser);
+            
+            // Зберігаємо оновлений список користувачів
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            // Зберігаємо поточного користувача
+            localStorage.setItem('currentUser', JSON.stringify(newUser));
+            
+            // Перенаправляємо на головну сторінку
+            window.location.href = '/';
+        });
+    </script>
+</body>
+</html> 

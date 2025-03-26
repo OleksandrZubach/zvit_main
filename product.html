@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товар - САД та ГОРОД</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .product-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .product-gallery img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        
+        .product-gallery img:hover {
+            transform: scale(1.05);
+        }
+        
+        .product-gallery img.active {
+            border: 2px solid #2e7d32;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Хедер -->
+    <header class="bg-white shadow-md">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <a href="/" class="flex items-center">
+                    <img src="images/logo.png" alt="GREEN" class="h-8">
+                </a>
+            </div>
+            <nav class="flex items-center space-x-4">
+                <div id="auth-links">
+                    <a href="/login.html" class="text-gray-600 hover:text-primary">Увійти</a>
+                    <a href="/register.html" class="ml-4 text-gray-600 hover:text-primary">Реєстрація</a>
+                </div>
+                <div id="user-menu" class="hidden">
+                    <a href="/profile.html" class="text-gray-600 hover:text-primary">Профіль</a>
+                    <button id="logout-btn" class="ml-4 text-gray-600 hover:text-primary">Вийти</button>
+                </div>
+                <div class="relative">
+                    <button id="cart-btn" class="flex items-center text-gray-600 hover:text-primary">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span id="cart-count" class="ml-2">0</span>
+                    </button>
+                    <div id="cart-dropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg z-50">
+                        <div class="p-4">
+                            <h3 class="text-lg font-semibold mb-4">Кошик</h3>
+                            <div id="cart-items" class="space-y-4">
+                                <!-- Тут будуть відображатися товари -->
+                            </div>
+                            <div class="mt-4 pt-4 border-t">
+                                <div class="flex justify-between items-center mb-4">
+                                    <span class="font-semibold">Всього:</span>
+                                    <span id="cart-total" class="font-semibold">0 ₴</span>
+                                </div>
+                                <div class="space-y-2">
+                                    <button onclick="clearCart()" class="block w-full text-center bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition-colors">
+                                        Очистити кошик
+                                    </button>
+                                    <a href="/cart.html" class="block w-full text-center bg-primary text-white py-2 rounded-lg hover:bg-dark-green transition-colors">
+                                        Переглянути кошик
+                                    </a>
+                                    <button id="checkout-btn" class="block w-full text-center bg-dark-green text-white py-2 rounded-lg hover:bg-primary transition-colors">
+                                        Оформити замовлення
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+        <div id="product-container" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Тут буде контент товару -->
+        </div>
+    </main>
+
+    <script>
+        // Масив товарів
+        const products = [
+            {
+                id: 1,
+                name: "Штучне дерево",
+                price: "1600 ₴",
+                image: "images/flower.jpg",
+                description: "Штучне дерево для прикраси приміщення. Висота: 1.5м. Матеріал: пластик, текстиль.",
+                specifications: {
+                    "Висота": "1.5м",
+                    "Матеріал": "Пластик, текстиль",
+                    "Колір": "Зелений",
+                    "Вага": "2.5 кг"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            },
+            {
+                id: 2,
+                name: "Міні лопата",
+                price: "1230 ₴",
+                image: "images/stovp.jpg",
+                description: "Компактна лопата для садових робіт. Матеріал: нержавіюча сталь, дерево.",
+                specifications: {
+                    "Довжина": "90см",
+                    "Матеріал": "Нержавіюча сталь, дерево",
+                    "Вага": "1.2 кг"
+                },
+                images: ["images/stovp.jpg", "images/flower.jpg"]
+            },
+            {
+                id: 3,
+                name: "Поливна система",
+                price: "2000 ₴",
+                image: "images/flower.jpg",
+                description: "Автоматична поливна система для саду. Включає таймер та насадки.",
+                specifications: {
+                    "Довжина шлангу": "20м",
+                    "Тип": "Автоматична",
+                    "Насадки": "3 шт"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            },
+            {
+                id: 4,
+                name: "Квітка 'Фіалка'",
+                price: "330 ₴",
+                image: "images/stovp.jpg",
+                description: "Штучна квітка фіалка для прикраси. Матеріал: текстиль, пластик.",
+                specifications: {
+                    "Висота": "30см",
+                    "Матеріал": "Текстиль, пластик",
+                    "Колір": "Фіолетовий"
+                },
+                images: ["images/stovp.jpg", "images/flower.jpg"]
+            },
+            {
+                id: 5,
+                name: "Садові ножиці",
+                price: "450 ₴",
+                image: "images/flower.jpg",
+                description: "Професійні садові ножиці для обрізки рослин. Матеріал: сталь.",
+                specifications: {
+                    "Довжина": "25см",
+                    "Матеріал": "Сталь",
+                    "Вага": "0.5 кг"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            },
+            {
+                id: 6,
+                name: "Газонокосарка",
+                price: "8500 ₴",
+                image: "images/stovp.jpg",
+                description: "Електрична газонокосарка для професійного використання.",
+                specifications: {
+                    "Потужність": "1500Вт",
+                    "Ширина скосу": "40см",
+                    "Висота скосу": "20-70мм"
+                },
+                images: ["images/stovp.jpg", "images/flower.jpg"]
+            },
+            {
+                id: 7,
+                name: "Садовий стіл",
+                price: "3200 ₴",
+                image: "images/flower.jpg",
+                description: "Стіл для саду з металу та дерева. Розмір: 120x80см.",
+                specifications: {
+                    "Розмір": "120x80см",
+                    "Матеріал": "Метал, дерево",
+                    "Вага": "15 кг"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            },
+            {
+                id: 8,
+                name: "Земля 50л",
+                price: "1500 ₴",
+                image: "images/flower.jpg",
+                description: "Родючий грунт для рослин. Об'єм: 50 літрів.",
+                specifications: {
+                    "Об'єм": "50л",
+                    "Тип": "Родючий грунт",
+                    "Вага": "25 кг"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            },
+            {
+                id: 9,
+                name: "Поливний шланг 1м",
+                price: "200 ₴",
+                image: "images/stovp.jpg",
+                description: "Поливний шланг довжиною 1 метр. Матеріал: ПВХ.",
+                specifications: {
+                    "Довжина": "1м",
+                    "Матеріал": "ПВХ",
+                    "Діаметр": "13мм"
+                },
+                images: ["images/stovp.jpg", "images/flower.jpg"]
+            },
+            {
+                id: 10,
+                name: "Відро 20л",
+                price: "250 ₴",
+                image: "images/flower.jpg",
+                description: "Пластикове відро для садових робіт. Об'єм: 20 літрів.",
+                specifications: {
+                    "Об'єм": "20л",
+                    "Матеріал": "Пластик",
+                    "Вага": "0.8 кг"
+                },
+                images: ["images/flower.jpg", "images/stovp.jpg"]
+            }
+        ];
+
+        // Функція для відображення товару
+        function displayProduct() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const productId = parseInt(urlParams.get('id'));
+            const product = products.find(p => p.id === productId);
+            
+            if (!product) {
+                window.location.href = '/';
+                return;
+            }
+
+            const container = document.getElementById('product-container');
+            container.innerHTML = `
+                <div class="space-y-4">
+                    <div class="relative">
+                        <img src="${product.image}" alt="${product.name}" class="w-full h-96 object-cover rounded-lg">
+                        <div class="product-gallery">
+                            ${product.images.map(img => `
+                                <img src="${img}" alt="${product.name}" class="${img === product.image ? 'active' : ''}" onclick="changeMainImage(this.src)">
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <h1 class="text-3xl font-bold">${product.name}</h1>
+                    <p class="text-2xl font-bold text-primary">${product.price}</p>
+                    <p class="text-gray-600">${product.description}</p>
+                    <div class="space-y-4">
+                        <h2 class="text-xl font-semibold">Характеристики</h2>
+                        <div class="grid grid-cols-2 gap-4">
+                            ${Object.entries(product.specifications).map(([key, value]) => `
+                                <div class="flex justify-between py-2 border-b">
+                                    <span class="font-medium">${key}:</span>
+                                    <span>${value}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center border rounded-lg">
+                            <button onclick="decrementQuantity()" class="px-4 py-2 text-xl hover:bg-gray-100">-</button>
+                            <input type="number" id="quantity" value="1" min="1" class="w-16 text-center border-x py-2">
+                            <button onclick="incrementQuantity()" class="px-4 py-2 text-xl hover:bg-gray-100">+</button>
+                        </div>
+                        <button onclick="addToCart(${product.id}, '${product.name}', '${product.price}', '${product.image}')" 
+                                class="flex-1 bg-green-600 text-white py-3 rounded-lg hover:bg-green-700 transition-colors">
+                            Додати до кошика
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Функція для зміни головного зображення
+        function changeMainImage(src) {
+            const mainImage = document.querySelector('.relative img');
+            mainImage.src = src;
+            document.querySelectorAll('.product-gallery img').forEach(img => {
+                img.classList.remove('active');
+                if (img.src === src) {
+                    img.classList.add('active');
+                }
+            });
+        }
+
+        // Функціонал кошика
+        let cart = [];
+
+        function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Отримуємо кошик з localStorage
+            let cart = [];
+            if (currentUser) {
+                cart = JSON.parse(localStorage.getItem(`cart_${currentUser.id}`)) || [];
+            } else {
+                cart = JSON.parse(localStorage.getItem('cart')) || [];
+            }
+            
+            // Рахуємо загальну кількість товарів
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            cartCount.textContent = totalItems;
+        }
+
+        function updateCartDropdown() {
+            const cartItems = document.getElementById('cart-items');
+            const cartTotal = document.getElementById('cart-total');
+            
+            // Отримуємо поточний кошик з localStorage
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                cart = JSON.parse(localStorage.getItem(`cart_${currentUser.id}`)) || [];
+            } else {
+                cart = JSON.parse(localStorage.getItem('cart')) || [];
+            }
+            
+            if (cart.length === 0) {
+                cartItems.innerHTML = '<div class="p-4 text-center text-gray-500">Корзина порожня</div>';
+                cartTotal.textContent = '0 ₴';
+                return;
+            }
+
+            cartItems.innerHTML = cart.map(item => `
+                <div class="flex items-center space-x-4">
+                    <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded">
+                    <div class="flex-1">
+                        <h4 class="font-medium">${item.name}</h4>
+                        <p class="text-gray-600">${item.price}</p>
+                        <div class="flex items-center space-x-2 mt-1">
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity - 1})" class="text-gray-600 hover:text-primary">-</button>
+                            <span>${item.quantity}</span>
+                            <button onclick="updateQuantity(${item.id}, ${item.quantity + 1})" class="text-gray-600 hover:text-primary">+</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            const total = cart.reduce((sum, item) => {
+                const price = parseInt(item.price.replace(/[^0-9]/g, ''));
+                return sum + (price * item.quantity);
+            }, 0);
+            
+            cartTotal.textContent = `${total} ₴`;
+        }
+
+        function updateQuantity(productId, newQuantity) {
+            if (newQuantity < 1) {
+                cart = cart.filter(item => item.id !== productId);
+            } else {
+                const item = cart.find(item => item.id === productId);
+                if (item) {
+                    item.quantity = newQuantity;
+                }
+            }
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                localStorage.setItem(`cart_${currentUser.id}`, JSON.stringify(cart));
+            } else {
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }
+            updateCartCount();
+            updateCartDropdown();
+        }
+
+        function addToCart(productId, name, price, image) {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Перевіряємо, чи товар дозволений до додавання
+            const allowedProducts = ['Міні лопата', 'Поливний шланг 1м'];
+            if (!allowedProducts.includes(name)) {
+                alert('Цей товар не можна додати до кошика');
+                return;
+            }
+
+            const quantity = parseInt(document.getElementById('quantity').value);
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const existingItem = cart.find(item => item.id === productId);
+
+            if (existingItem) {
+                existingItem.quantity += quantity;
+            } else {
+                cart.push({
+                    id: productId,
+                    name,
+                    price,
+                    image,
+                    quantity: quantity
+                });
+            }
+
+            localStorage.setItem('cart', JSON.stringify(cart));
+            localStorage.setItem(`cart_${currentUser.id}`, JSON.stringify(cart));
+            
+            updateCartCount();
+            updateCartDropdown();
+            showAddToCartAnimation();
+        }
+
+        function clearCart() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (currentUser) {
+                cart = [];
+                localStorage.removeItem('cart');
+                localStorage.removeItem(`cart_${currentUser.id}`);
+                updateCartCount();
+                updateCartDropdown();
+                showClearCartNotification();
+            }
+        }
+
+        function showAddToCartAnimation() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = 'Товар додано до кошика';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showClearCartNotification() {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            notification.textContent = 'Кошик очищено';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Перевірка авторизації
+        function checkAuth() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            const authLinks = document.getElementById('auth-links');
+            const userMenu = document.getElementById('user-menu');
+            
+            if (currentUser) {
+                authLinks.classList.add('hidden');
+                userMenu.classList.remove('hidden');
+                const userCart = JSON.parse(localStorage.getItem(`cart_${currentUser.id}`)) || [];
+                localStorage.setItem('cart', JSON.stringify(userCart));
+            } else {
+                authLinks.classList.remove('hidden');
+                userMenu.classList.add('hidden');
+                localStorage.removeItem('cart');
+            }
+            updateCartCount();
+            updateCartDropdown();
+        }
+
+        // Ініціалізація
+        document.addEventListener('DOMContentLoaded', function() {
+            displayProduct();
+            checkAuth();
+            updateCartCount();
+
+            // Обробники подій для кошика
+            const cartButton = document.getElementById('cart-btn');
+            const cartDropdown = document.getElementById('cart-dropdown');
+
+            cartButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                
+                if (!currentUser) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                cartDropdown.classList.toggle('hidden');
+                updateCartDropdown();
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!cartButton.contains(e.target) && !cartDropdown.contains(e.target)) {
+                    cartDropdown.classList.add('hidden');
+                }
+            });
+
+            // Обробник виходу
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                localStorage.removeItem('currentUser');
+                localStorage.removeItem('cart');
+                window.location.reload();
+            });
+        });
+
+        // Функції для керування кількістю
+        function incrementQuantity() {
+            const input = document.getElementById('quantity');
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function decrementQuantity() {
+            const input = document.getElementById('quantity');
+            if (parseInt(input.value) > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+    </script>
+</body>
+</html> 

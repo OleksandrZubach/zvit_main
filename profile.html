@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профіль - САД та ГОРОД</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #d1f3d1;
+        }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen py-8">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h1 class="text-2xl font-bold text-dark-green">Профіль користувача</h1>
+                        <div class="flex gap-4">
+                            <button onclick="clearOrders()" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-trash-alt mr-2"></i>Очистити замовлення
+                            </button>
+                            <button id="logout-btn" class="text-red-600 hover:text-red-800">
+                                <i class="fas fa-sign-out-alt mr-2"></i>Вийти
+                            </button>
+                        </div>
+                    </div>
+                    <div id="user-info" class="mb-8">
+                        <!-- Тут буде інформація про користувача -->
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-bold text-dark-green mb-6">Мої замовлення</h2>
+                    <div id="orders-list" class="space-y-4">
+                        <!-- Тут будуть відображатися замовлення -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Перевірка авторизації
+        function checkAuth() {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = '/login.html';
+                return;
+            }
+            return currentUser;
+        }
+
+        // Відображення інформації про користувача
+        function displayUserInfo(user) {
+            const userInfo = document.getElementById('user-info');
+            userInfo.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-gray-600">Ім'я:</p>
+                        <p class="font-medium">${user.name}</p>
+                    </div>
+                    <div>
+                        <p class="text-gray-600">Email:</p>
+                        <p class="font-medium">${user.email}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Відображення замовлень
+        function displayOrders() {
+            const ordersList = document.getElementById('orders-list');
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            
+            // Фільтруємо замовлення для поточного користувача
+            const userOrders = orders.filter(order => order.userId === currentUser.id);
+            
+            if (userOrders.length === 0) {
+                ordersList.innerHTML = '<p class="text-gray-500 text-center">У вас ще немає замовлень</p>';
+                return;
+            }
+
+            ordersList.innerHTML = userOrders.map(order => `
+                <div class="border rounded-lg p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <p class="text-gray-600">Замовлення #${order.id}</p>
+                            <p class="text-sm text-gray-500">${new Date(order.date).toLocaleString()}</p>
+                        </div>
+                        <span class="px-3 py-1 rounded-full text-sm ${
+                            order.status === 'Нове' ? 'bg-yellow-100 text-yellow-800' :
+                            order.status === 'В обробці' ? 'bg-blue-100 text-blue-800' :
+                            order.status === 'Відправлено' ? 'bg-green-100 text-green-800' :
+                            'bg-gray-100 text-gray-800'
+                        }">${order.status}</span>
+                    </div>
+                    <div class="space-y-2">
+                        ${order.items.map(item => `
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center space-x-2">
+                                    <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded">
+                                    <div>
+                                        <p class="font-medium">${item.name}</p>
+                                        <p class="text-sm text-gray-600">${item.quantity} шт.</p>
+                                    </div>
+                                </div>
+                                <p class="font-medium">${item.price}</p>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="mt-4 pt-4 border-t">
+                        <div class="flex justify-between items-center">
+                            <span class="font-medium">Загальна сума:</span>
+                            <span class="font-bold text-dark-green">${order.total} ₴</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Обробник виходу
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('currentUser');
+            window.location.href = '/';
+        });
+
+        // Додаємо функцію очищення замовлень
+        function clearOrders() {
+            if (confirm('Ви впевнені, що хочете видалити всі замовлення?')) {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                if (currentUser) {
+                    // Отримуємо всі замовлення
+                    let orders = JSON.parse(localStorage.getItem('orders')) || [];
+                    
+                    // Фільтруємо замовлення, залишаючи тільки ті, що не належать поточному користувачу
+                    orders = orders.filter(order => order.userId !== currentUser.id);
+                    
+                    // Зберігаємо оновлений список замовлень
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                    
+                    // Оновлюємо відображення
+                    displayOrders();
+                    
+                    // Показуємо повідомлення
+                    alert('Всі замовлення успішно видалено!');
+                }
+            }
+        }
+
+        // Ініціалізація сторінки
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUser = checkAuth();
+            if (currentUser) {
+                displayUserInfo(currentUser);
+                
+                // Додаємо тестове замовлення, якщо замовлень немає
+                let orders = JSON.parse(localStorage.getItem('orders')) || [];
+                const userOrders = orders.filter(order => order.userId === currentUser.id);
+                
+                if (userOrders.length === 0) {
+                    const testOrder = {
+                        id: Date.now(),
+                        userId: currentUser.id,
+                        date: new Date().toISOString(),
+                        items: [
+                            {
+                                id: 2,
+                                name: "Міні лопата",
+                                price: "1230 ₴",
+                                image: "images/stovp.jpg",
+                                quantity: 1
+                            },
+                            {
+                                id: 9,
+                                name: "Поливний шланг 1м",
+                                price: "200 ₴",
+                                image: "images/stovp.jpg",
+                                quantity: 6
+                            }
+                        ],
+                        total: 2430,
+                        status: 'Нове'
+                    };
+                    
+                    orders.push(testOrder);
+                    localStorage.setItem('orders', JSON.stringify(orders));
+                }
+                
+                displayOrders();
+            }
+        });
+    </script>
+</body>
+</html> 
